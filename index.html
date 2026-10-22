@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mario Atacado</title>
+<meta name="description" content="Catálogo digital de atacado com carrinho e pedido pelo WhatsApp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: barra fixa + busca + trilho de categorias rolável + grade de cartões; produto em modal, carrinho em gaveta lateral */
+:root {
+  --bg: #f6f4ee;
+  --surface: #ffffff;
+  --ink: #1d1f24;
+  --muted: #6a6c72;
+  --line: #e2ded2;
+  --accent: #f2c230;      /* amarelo-etiqueta */
+  --accent-ink: #1d1f24;
+  --active: #2747c9;      /* categoria selecionada */
+  --active-ink: #ffffff;
+  --ok: #25a35a;
+  --ok-ink: #ffffff;
+  --shade: rgba(20, 20, 24, .55);
+  --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161a; --surface: #1f2126; --ink: #f1efe8; --muted: #a3a4a9; --line: #33353c;
+    --accent: #f2c230; --accent-ink: #1d1f24; --active: #6d86ff; --active-ink: #0f1120;
+    --ok: #2fbf6b; --ok-ink: #08180e; --shade: rgba(0,0,0,.65); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15161a; --surface: #1f2126; --ink: #f1efe8; --muted: #a3a4a9; --line: #33353c;
+  --accent: #f2c230; --accent-ink: #1d1f24; --active: #6d86ff; --active-ink: #0f1120;
+  --ok: #2fbf6b; --ok-ink: #08180e; --shade: rgba(0,0,0,.65); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--active); outline-offset: 2px; }
+
+/* Barra superior */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.topbar-inner { max-width: 1180px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.brand-mark {
+  width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--ink); color: var(--bg);
+  display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: .02em;
+}
+.brand-text { min-width: 0; }
+.brand-name { font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
+.brand-addr { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn {
+  position: relative; height: 40px; min-width: 40px; padding: 0 12px; border-radius: 8px;
+  background: var(--accent); color: var(--accent-ink); display: inline-flex; align-items: center; gap: 8px; font-weight: 600;
+}
+.icon-btn svg { width: 20px; height: 20px; }
+.badge {
+  position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+  background: var(--active); color: var(--active-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Busca + categorias */
+.controls { max-width: 1180px; margin: 0 auto; padding: 12px 16px 4px; display: grid; gap: 10px; }
+.search { display: flex; gap: 8px; }
+.search-field { flex: 1; min-width: 0; position: relative; }
+.search-field input {
+  width: 100%; height: 42px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink);
+  padding: 0 40px 0 14px; font: inherit; text-transform: uppercase; letter-spacing: .03em;
+}
+.search-field input::placeholder { color: var(--muted); }
+.search-field svg { position: absolute; right: 12px; top: 11px; width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.chip {
+  flex: none; height: 36px; padding: 0 14px; border-radius: 8px; background: var(--accent); color: var(--accent-ink);
+  font-family: var(--display); font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: .03em;
+}
+.seg { display: inline-flex; justify-self: start; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { height: 34px; padding: 0 16px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.chip[aria-pressed="true"] { background: var(--active); color: var(--active-ink); }
+
+/* Grade */
+main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
+.count { font-size: 13px; color: var(--muted); padding: 4px 0 12px; font-variant-numeric: tabular-nums; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 18px; }
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+.card { display: flex; flex-direction: column; min-width: 0; text-align: center; }
+.thumb {
+  position: relative; aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--line);
+  display: block; width: 100%;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.code-tag {
+  position: absolute; right: 6px; bottom: 6px; background: var(--surface); color: var(--ink); font-size: 10.5px; font-weight: 600;
+  padding: 1px 5px; border-radius: 4px; font-variant-numeric: tabular-nums; letter-spacing: .03em;
+}
+.card h3 {
+  margin: 10px 0 4px; font-family: var(--display); font-weight: 700; font-size: 17px; line-height: 1.15; text-transform: uppercase;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-wrap: balance;
+}
+.card .desc { font-size: 12px; color: var(--muted); text-transform: uppercase; line-height: 1.35; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.price { font-family: var(--display); font-weight: 800; font-size: 24px; margin: 10px 0 6px; font-variant-numeric: tabular-nums; }
+.buy { height: 36px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font-weight: 600; width: 100%; }
+.empty { text-align: center; color: var(--muted); padding: 60px 0; }
+
+/* Modal do produto */
+.overlay { position: fixed; inset: 0; background: var(--shade); z-index: 40; display: grid; place-items: center; padding: 16px; }
+.modal {
+  width: min(720px, 100%); max-height: calc(100% - 16px); overflow: auto; background: var(--surface); border-radius: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; padding: 20px; position: relative;
+}
+@media (max-width: 640px) { .modal { grid-template-columns: minmax(0, 1fr); } }
+.close {
+  position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+  display: grid; place-items: center; z-index: 1;
+}
+.close svg { width: 18px; height: 18px; }
+.gallery-main { aspect-ratio: 1/1; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--line); }
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.thumbs button { width: 52px; height: 52px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; padding: 0; }
+.thumbs button[aria-current="true"] { border-color: var(--active); }
+.thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.m-info { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.m-code { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; font-variant-numeric: tabular-nums; padding-right: 44px; }
+.m-title { margin: 0; font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
+.m-desc { font-size: 14px; color: var(--muted); text-transform: uppercase; }
+.spec { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.spec dt { color: var(--muted); }
+.spec dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stock { font-size: 13px; font-weight: 600; }
+.qty { display: inline-flex; align-items: center; border-radius: 8px; overflow: hidden; background: var(--ink); color: var(--bg); align-self: flex-start; }
+.qty button { width: 42px; height: 40px; font-size: 22px; font-weight: 700; color: var(--bg); }
+.qty input {
+  width: 56px; height: 40px; border: 0; text-align: center; font: inherit; font-weight: 600; background: var(--surface); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.m-total { font-family: var(--display); font-weight: 800; font-size: 28px; font-variant-numeric: tabular-nums; }
+.add { height: 46px; border-radius: 8px; background: var(--ok); color: var(--ok-ink); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.add svg { width: 18px; height: 18px; }
+
+/* Gaveta do carrinho */
+.drawer-wrap { position: fixed; inset: 0; z-index: 50; background: var(--shade); }
+.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 100%); background: var(--surface);
+  display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-left: 1px solid var(--line);
+}
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.drawer-head h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 800; text-transform: uppercase; }
+.lines { flex: 1; overflow: auto; padding: 8px 16px; }
+.line { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.line img { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; }
+.line-name { font-size: 13px; font-weight: 600; text-transform: uppercase; line-height: 1.2; }
+.line-sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.line-ctrl { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.mini-qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; }
+.mini-qty button { width: 28px; height: 28px; font-weight: 700; }
+.mini-qty span { min-width: 24px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+.line-total { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; }
+.remove { font-size: 12px; color: var(--muted); text-decoration: underline; }
+.drawer-foot { border-top: 2px solid var(--ink); padding: 14px 16px; display: grid; gap: 10px; }
+.sum { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.sum.big { font-family: var(--display); font-size: 26px; font-weight: 800; }
+.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.field input { height: 40px; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font: inherit; background: var(--bg); color: var(--ink); }
+.wa-btn {
+  height: 48px; border-radius: 8px; background: var(--ok); color: var(--ok-ink); font-weight: 600; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.wa-btn svg { width: 20px; height: 20px; }
+.wa-btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+.secondary { height: 40px; border-radius: 8px; border: 1px solid var(--line); font-weight: 500; }
+.note { font-size: 12px; color: var(--muted); }
+.order-text { width: 100%; min-height: 120px; font: 12px/1.4 ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); padding: 8px; }
+
+/* WhatsApp flutuante */
+.wa-float {
+  position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 30; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--ok); color: var(--ok-ink); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+.wa-float svg { width: 28px; height: 28px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 500; font-size: 14px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .drawer { animation: slide .2s ease-out; }
+  @keyframes slide { from { transform: translateX(30px); opacity: .6; } }
+}
+</style>
+<style>
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" id="brandMark"></div>
+      <div class="brand-text">
+        <div class="brand-name" id="brandName"></div>
+        <div class="brand-addr" id="brandAddr"></div>
+      </div>
+    </div>
+    <button class="icon-btn" id="openCart" aria-label="Abrir carrinho">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.5L22 8H6"/></svg>
+      <span class="badge" id="cartBadge" hidden>0</span>
+    </button>
+  </div>
+</header>
+
+<div class="controls">
+  <form class="search" id="searchForm">
+    <div class="search-field">
+      <input id="q" type="search" placeholder="Filtragem rápida…" autocomplete="off" aria-label="Buscar produto ou código">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </div>
+  </form>
+  <nav class="chips" id="chips" aria-label="Categorias"></nav>
+  <div class="seg" id="seg" role="group" aria-label="Filtrar por gênero"></div>
+</div>
+
+<main>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3Z"/></svg>
+</a>
+
+<div class="overlay" id="overlay" hidden></div>
+<div class="drawer-wrap" id="drawerWrap" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO DA LOJA — edite aqui
+   ===================================================================== */
+const LOJA = {
+  nome: "Mario Atacado",
+  sigla: "MA",
+  endereco: "Rua das Confecções, 120 · Centro · Santa Cruz do Capibaribe – PE",
+  whatsapp: "5581999999999",   // DDI + DDD + número, só dígitos
+  pedidoMinimo: 0              // valor mínimo do pedido em R$ (0 para desativar)
+};
+
+/* PRODUTOS
+   codigo, nome, categoria, genero (Menino / Menina / Unissex), precoUnit (R$ por peça; null = sob consulta), pacote (peças por pacote),
+   estoque (pacotes disponíveis; null = sem limite), descricao, imagens (lista de URLs; vazio = imagem gerada) */
+const PRODUTOS = [
+  {codigo: "001", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: []},
+  {codigo: "002", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: []},
+  {codigo: "003", nome: "Macacões Zíper P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: []},
+  {codigo: "004", nome: "Macacões Zíper P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: []},
+  {codigo: "005", nome: "Conjuntos de Body Curto + Short P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
+  {codigo: "006", nome: "Conjuntos de Body Curto + Short P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
+  {codigo: "007", nome: "Conjuntos de Body Curto + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
+  {codigo: "008", nome: "Conjuntos de Body Curto + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
+  {codigo: "009", nome: "Conjuntos de Body Longo + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
+  {codigo: "010", nome: "Conjuntos de Body Longo + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
+  {codigo: "011", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "012", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "013", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
+  {codigo: "014", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
+  {codigo: "015", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "016", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
+  {codigo: "017", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
+  {codigo: "018", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
+  {codigo: "019", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "020", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "021", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Personagens", imagens: []},
+  {codigo: "022", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Personagens", imagens: []},
+  {codigo: "023", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "024", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
+  {codigo: "025", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
+  {codigo: "026", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
+  {codigo: "027", nome: "Vestidos Cotton 2 ao 14 - Coleção", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Coleção", imagens: []},
+  {codigo: "028", nome: "Vestidos Cotton 2 ao 14 - Personagens", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Personagens", imagens: []},
+  {codigo: "029", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "030", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "031", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
+  {codigo: "032", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
+  {codigo: "033", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "034", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
+  {codigo: "035", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
+  {codigo: "036", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
+  {codigo: "037", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "038", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "039", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Liso", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Liso", imagens: []},
+  {codigo: "040", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Liso", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Liso", imagens: []},
+  {codigo: "041", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "042", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "043", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
+  {codigo: "044", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
+  {codigo: "045", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "046", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
+  {codigo: "047", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
+  {codigo: "048", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
+  {codigo: "049", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
+  {codigo: "050", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
+  {codigo: "051", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
+  {codigo: "052", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
+  {codigo: "053", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "054", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
+  {codigo: "055", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
+  {codigo: "056", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
+  {codigo: "057", nome: "Calças de Moletom 1 ao 14 - Masculino", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino", imagens: []},
+  {codigo: "058", nome: "Calças de Moletom 1 ao 14 - Feminino", categoria: "Moletom avulso", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Feminino", imagens: []},
+  {codigo: "059", nome: "Blusa de Moletom 1 ao 14 - Masculino Coleção", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Coleção", imagens: []},
+  {codigo: "060", nome: "Blusa de Moletom 1 ao 14 - Masculino Personagens", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Personagens", imagens: []}
+];
+/* ===================================================================== */
+
+const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const precoPacote = (p) => (p.precoUnit == null ? null : +(p.precoUnit * p.pacote).toFixed(2));
+const preco = (v) => (v == null ? "Sob consulta" : BRL.format(v));
+const subtotal = (p, q) => (p.precoUnit == null ? null : precoPacote(p) * q);
+const temEstoque = (p) => p.estoque == null || p.estoque > 0;
+const maxQ = (p) => (p.estoque == null ? 999 : p.estoque);
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+// Imagem gerada quando o produto não tem foto
+const HUES = {};
+function placeholder(p, variant = 0) {
+  if (!(p.categoria in HUES)) HUES[p.categoria] = (Object.keys(HUES).length * 47 + 20) % 360;
+  const h = (HUES[p.categoria] + variant * 25) % 360;
+  const words = p.nome.toUpperCase().split(" ").slice(0, 3).join(" ");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h} 45% 82%)"/><stop offset="1" stop-color="hsl(${(h + 30) % 360} 40% 66%)"/></linearGradient></defs>
+    <rect width="400" height="400" fill="url(#g)"/>
+    <circle cx="300" cy="110" r="120" fill="hsl(${h} 50% 92%)" opacity=".55"/>
+    <text x="28" y="330" font-family="Arial Narrow, Arial, sans-serif" font-weight="700" font-size="26" fill="hsl(${h} 35% 22%)">${esc(p.categoria.toUpperCase())}</text>
+    <text x="28" y="364" font-family="Arial, sans-serif" font-size="17" fill="hsl(${h} 30% 30%)">${esc(words)}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+const imagens = (p) => (p.imagens && p.imagens.length ? p.imagens : [placeholder(p, 0), placeholder(p, 1), placeholder(p, 2)]);
+
+// Estado
+let categoria = "TODOS";
+let genero = "Todos";
+let busca = "";
+let carrinho = {};   // codigo -> qtd de pacotes
+try { carrinho = JSON.parse(localStorage.getItem("carrinho") || "{}") || {}; } catch (e) { carrinho = {}; }
+const salvar = () => { try { localStorage.setItem("carrinho", JSON.stringify(carrinho)); } catch (e) {} };
+
+// Cabeçalho
+$("brandMark").textContent = LOJA.sigla;
+$("brandName").textContent = LOJA.nome;
+$("brandAddr").textContent = LOJA.endereco;
+$("waFloat").href = `https://wa.me/${LOJA.whatsapp}`;
+document.title = LOJA.nome + " · Catálogo";
+
+// Categorias
+const categorias = ["TODOS", ...new Set(PRODUTOS.map((p) => p.categoria))];
+function renderSeg() {
+  $("seg").innerHTML = ["Todos", "Menino", "Menina"].map((g) =>
+    `<button data-gen="${g}" aria-pressed="${g === genero}">${g}</button>`).join("");
+}
+$("seg").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-gen]"); if (!b) return;
+  genero = b.dataset.gen; renderSeg(); renderGrid();
+});
+function renderChips() {
+  $("chips").innerHTML = categorias.map((c) =>
+    `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === categoria}">${esc(c)}</button>`).join("");
+}
+$("chips").addEventListener("click", (e) => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  categoria = b.dataset.cat; renderChips(); renderGrid();
+});
+
+// Grade
+function filtrados() {
+  const q = norm(busca.trim());
+  return PRODUTOS.filter((p) =>
+    (categoria === "TODOS" || p.categoria === categoria) &&
+    (genero === "Todos" || p.genero === genero || p.genero === "Unissex") &&
+    (!q || norm(p.nome + " " + p.codigo + " " + p.descricao).includes(q))
+  );
+}
+function renderGrid() {
+  const lista = filtrados();
+  $("count").textContent = `${lista.length} de ${PRODUTOS.length} produtos`;
+  $("grid").innerHTML = lista.length ? lista.map((p) => `
+    <article class="card">
+      <button class="thumb" data-open="${esc(p.codigo)}" aria-label="Ver ${esc(p.nome)}">
+        <img src="${imagens(p)[0]}" alt="" loading="lazy"><span class="code-tag">${esc(p.codigo)}</span>
+      </button>
+      <h3>${esc(p.nome)}</h3>
+      <div class="desc">${p.precoUnit != null ? `Valor unitário ${BRL.format(p.precoUnit)} | ` : ""}${esc(p.descricao)}</div>
+      <div class="price">${preco(precoPacote(p))}</div>
+      <button class="buy" data-open="${esc(p.codigo)}">${temEstoque(p) ? "Comprar" : "Esgotado"}</button>
+    </article>`).join("") : `<div class="empty">Nenhum produto encontrado para “${esc(busca)}”.</div>`;
+}
+$("grid").addEventListener("click", (e) => { const b = e.target.closest("[data-open]"); if (b) abrirProduto(b.dataset.open); });
+$("q").addEventListener("input", (e) => { busca = e.target.value; renderGrid(); });
+$("searchForm").addEventListener("submit", (e) => e.preventDefault());
+
+// Modal do produto
+function abrirProduto(codigo) {
+  const p = PRODUTOS.find((x) => x.codigo === codigo); if (!p) return;
+  const imgs = imagens(p);
+  let qtd = 1;
+  const ov = $("overlay");
+  ov.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <button class="close" data-close aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <div>
+        <div class="gallery-main"><img id="mImg" src="${imgs[0]}" alt="${esc(p.nome)}"></div>
+        ${imgs.length > 1 ? `<div class="thumbs">${imgs.map((src, i) => `<button data-img="${i}" aria-current="${i === 0}" aria-label="Foto ${i + 1}"><img src="${src}" alt=""></button>`).join("")}</div>` : ""}
+      </div>
+      <div class="m-info">
+        <div class="m-code">Cód. ${esc(p.codigo)} · ${esc(p.categoria)} · ${esc(p.genero)}</div>
+        <h2 class="m-title" id="mTitle">${esc(p.nome)}</h2>
+        <div class="m-desc">${esc(p.descricao)}</div>
+        <dl class="spec">
+          <dt>Valor unitário</dt><dd>${preco(p.precoUnit)}</dd>
+          <dt>Peças por pacote</dt><dd>${p.pacote}</dd>
+          <dt>Valor do pacote</dt><dd>${preco(precoPacote(p))}</dd>
+        </dl>
+        ${p.estoque == null ? "" : `<div class="stock" style="color:${p.estoque > 0 ? "var(--ok)" : "var(--muted)"}">${p.estoque > 0 ? `${p.estoque} pacotes disponíveis` : "Esgotado no momento"}</div>`}
+        ${temEstoque(p) ? `
+        <div class="qty">
+          <button data-step="-1" aria-label="Diminuir">−</button>
+          <input id="mQty" type="number" inputmode="numeric" min="1" max="${maxQ(p)}" value="1" aria-label="Quantidade de pacotes">
+          <button data-step="1" aria-label="Aumentar">+</button>
+        </div>
+        <div class="m-total" id="mTotal">${preco(precoPacote(p))}</div>
+        <button class="add" id="mAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Adicionar ao carrinho</button>` : ""}
+      </div>
+    </div>`;
+  ov.hidden = false;
+  document.body.style.overflow = "hidden";
+  const input = $("mQty");
+  const setQ = (n) => {
+    qtd = Math.max(1, Math.min(maxQ(p), Math.floor(+n) || 1));
+    if (input) input.value = qtd;
+    if ($("mTotal")) $("mTotal").textContent = preco(subtotal(p, qtd));
+  };
+  ov.onclick = (e) => {
+    if (e.target === ov || e.target.closest("[data-close]")) return fecharProduto();
+    const s = e.target.closest("[data-step]"); if (s) setQ(qtd + +s.dataset.step);
+    const t = e.target.closest("[data-img]");
+    if (t) { $("mImg").src = imgs[+t.dataset.img]; ov.querySelectorAll("[data-img]").forEach((b) => b.setAttribute("aria-current", b === t)); }
+    if (e.target.closest("#mAdd")) {
+      carrinho[p.codigo] = Math.min(maxQ(p), (carrinho[p.codigo] || 0) + qtd);
+      salvar(); atualizarBadge(); fecharProduto(); toast(`${qtd} pct adicionado ao carrinho`);
+    }
+  };
+  if (input) input.addEventListener("change", () => setQ(input.value));
+  ov.querySelector(".close").focus();
+}
+function fecharProduto() { $("overlay").hidden = true; $("overlay").innerHTML = ""; document.body.style.overflow = ""; }
+
+// Carrinho
+function itens() {
+  return Object.entries(carrinho).map(([c, q]) => ({ p: PRODUTOS.find((x) => x.codigo === c), q })).filter((i) => i.p && i.q > 0);
+}
+function atualizarBadge() {
+  const n = itens().reduce((s, i) => s + i.q, 0);
+  $("cartBadge").textContent = n; $("cartBadge").hidden = n === 0;
+}
+function textoPedido(nome) {
+  const lista = itens();
+  const total = lista.reduce((s, i) => s + (subtotal(i.p, i.q) || 0), 0);
+  const consulta = lista.some((i) => i.p.precoUnit == null);
+  return [
+    `*Pedido – ${LOJA.nome}*`,
+    nome ? `Cliente: ${nome}` : null,
+    "",
+    ...lista.map((i) => `${i.q}x [${i.p.codigo}] ${i.p.nome.toUpperCase()} (pct c/${i.p.pacote})${i.p.precoUnit != null ? ` – ${BRL.format(subtotal(i.p, i.q))}` : ""}`),
+    "",
+    `Pacotes: ${lista.reduce((s, i) => s + i.q, 0)}`,
+    total > 0 ? `*Total: ${BRL.format(total)}*${consulta ? " + itens sob consulta" : ""}` : "Valores: sob consulta"
+  ].filter((l) => l !== null).join("\n");
+}
+let nomeCliente = "";
+function renderCarrinho() {
+  const lista = itens();
+  const total = lista.reduce((s, i) => s + (subtotal(i.p, i.q) || 0), 0);
+  const consulta = lista.some((i) => i.p.precoUnit == null);
+  const pacotes = lista.reduce((s, i) => s + i.q, 0);
+  const falta = consulta ? 0 : Math.max(0, LOJA.pedidoMinimo - total);
+  const w = $("drawerWrap");
+  w.innerHTML = `
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+      <div class="drawer-head"><h2 id="cTitle">Meu carrinho</h2>
+        <button class="close" style="position:static" data-close aria-label="Fechar carrinho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="lines">
+        ${lista.length ? lista.map((i) => `
+          <div class="line">
+            <img src="${imagens(i.p)[0]}" alt="">
+            <div style="min-width:0"><div class="line-name">${esc(i.p.nome)}</div>
+              <div class="line-sub">Cód. ${esc(i.p.codigo)} · pct c/${i.p.pacote}${i.p.precoUnit != null ? ` · ${BRL.format(precoPacote(i.p))}` : ""}</div></div>
+            <div class="line-ctrl">
+              <div class="mini-qty"><button data-dec="${esc(i.p.codigo)}" aria-label="Menos">−</button><span>${i.q}</span><button data-inc="${esc(i.p.codigo)}" aria-label="Mais">+</button></div>
+              <div class="line-total">${preco(subtotal(i.p, i.q))}</div>
+              <button class="remove" data-rm="${esc(i.p.codigo)}">Remover</button>
+            </div>
+          </div>`).join("") : `<div class="empty">Nenhum item no carrinho.</div>`}
+      </div>
+      <div class="drawer-foot">
+        <div class="sum"><span>Qtd. pacotes</span><strong>${pacotes}</strong></div>
+        <div class="sum big"><span>Total</span><span>${total > 0 ? BRL.format(total) : (lista.length ? "Sob consulta" : BRL.format(0))}</span></div>
+        ${total > 0 && consulta ? `<div class="note">Alguns itens estão sob consulta e não entram no total.</div>` : ""}
+        ${lista.length ? `
+          ${falta > 0 ? `<div class="note">Pedido mínimo de ${BRL.format(LOJA.pedidoMinimo)}. Faltam ${BRL.format(falta)}.</div>` : ""}
+          <label class="field" for="cNome">Seu nome (opcional)<input id="cNome" value="${esc(nomeCliente)}" autocomplete="name"></label>
+          <a class="wa-btn" id="cSend" target="_blank" rel="noopener" aria-disabled="${falta > 0}">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg>Enviar pedido pelo WhatsApp</a>
+          <button class="secondary" id="cCopy">Copiar pedido</button>
+          <div class="note">O WhatsApp abre com o pedido pronto. Você confere e envia por lá. Número da loja: +${LOJA.whatsapp}</div>
+          <textarea class="order-text" id="cText" readonly hidden aria-label="Texto do pedido"></textarea>
+          <button class="remove" id="cClear" style="justify-self:start">Esvaziar carrinho</button>` : ""}
+      </div>
+    </aside>`;
+  const atualizarLink = () => { const a = $("cSend"); if (a) a.href = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(textoPedido(nomeCliente))}`; };
+  atualizarLink();
+  const nome = $("cNome"); if (nome) nome.addEventListener("input", () => { nomeCliente = nome.value; atualizarLink(); });
+}
+function abrirCarrinho() {
+  renderCarrinho(); $("drawerWrap").hidden = false; document.body.style.overflow = "hidden";
+  $("drawerWrap").querySelector("[data-close]").focus();
+}
+function fecharCarrinho() { $("drawerWrap").hidden = true; document.body.style.overflow = ""; }
+$("openCart").addEventListener("click", abrirCarrinho);
+$("drawerWrap").addEventListener("click", (e) => {
+  const w = $("drawerWrap");
+  if (e.target === w || e.target.closest("[data-close]")) return fecharCarrinho();
+  const t = e.target;
+  const ajusta = (c, d) => {
+    const p = PRODUTOS.find((x) => x.codigo === c);
+    carrinho[c] = Math.max(0, Math.min(maxQ(p), (carrinho[c] || 0) + d));
+    if (!carrinho[c]) delete carrinho[c];
+    salvar(); atualizarBadge(); renderCarrinho();
+  };
+  if (t.closest("[data-inc]")) ajusta(t.closest("[data-inc]").dataset.inc, 1);
+  else if (t.closest("[data-dec]")) ajusta(t.closest("[data-dec]").dataset.dec, -1);
+  else if (t.closest("[data-rm]")) { delete carrinho[t.closest("[data-rm]").dataset.rm]; salvar(); atualizarBadge(); renderCarrinho(); }
+  else if (t.closest("#cClear")) { carrinho = {}; salvar(); atualizarBadge(); renderCarrinho(); }
+  else if (t.closest("#cCopy")) {
+    const txt = textoPedido(nomeCliente);
+    const fallback = () => { const ta = $("cText"); ta.value = txt; ta.hidden = false; ta.select(); toast("Selecione e copie o texto abaixo"); };
+    try { navigator.clipboard.writeText(txt).then(() => toast("Pedido copiado"), fallback); } catch (err) { fallback(); }
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!$("overlay").hidden) fecharProduto(); else if (!$("drawerWrap").hidden) fecharCarrinho();
+});
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200);
+}
+
+renderChips(); renderSeg(); renderGrid(); atualizarBadge();
+</script>
+</body>
+</html>

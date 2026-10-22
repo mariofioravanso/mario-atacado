@@ -134,6 +134,18 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
 .teaser h2 { margin: 2px 0 6px; font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
 .teaser p { margin: 0; opacity: .85; max-width: 52ch; }
 .teaser .wa-btn { padding: 0 20px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; counter-reset: passo; }
+@media (max-width: 700px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.steps li { counter-increment: passo; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.25; min-width: 0; }
+.steps li::before { content: counter(passo); flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 14px; }
+.steps strong { font-weight: 600; }
+.choice { display: grid; gap: 6px; }
+.choice-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.choice-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt { flex: 1 1 140px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; cursor: pointer; background: var(--bg); }
+.opt:has(input:checked) { border-color: var(--ink); background: var(--surface); box-shadow: inset 0 0 0 1px var(--ink); }
+.opt input { accent-color: var(--ink); margin: 0; }
+.cart-err { color: #c0392b; font-size: 13px; font-weight: 600; }
 .buy { height: 36px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font-weight: 600; width: 100%; }
 .empty { text-align: center; color: var(--muted); padding: 60px 0; }
 
@@ -265,6 +277,12 @@ img { max-width: 100%; }
 </header>
 
 <div class="controls">
+  <ol class="steps" aria-label="Como funciona">
+    <li><span><strong>Monte</strong> seu pedido</span></li>
+    <li><span><strong>Envie</strong> pelo WhatsApp</span></li>
+    <li><span><strong>Pague</strong> no Pix ou cartão</span></li>
+    <li><span><strong>Retire</strong> no Moda Center ou receba na sua cidade</span></li>
+  </ol>
   <form class="search" id="searchForm">
     <div class="search-field">
       <input id="q" type="search" placeholder="Filtragem rápida…" autocomplete="off" aria-label="Buscar produto ou código">
@@ -316,7 +334,8 @@ img { max-width: 100%; }
 const LOJA = {
   nome: "Mario Atacado",
   sigla: "MA",
-  endereco: "Catálogo de moda infantil no atacado",
+  endereco: "Direto da fábrica · Retire no Moda Center ou receba na sua cidade",
+  retirada: "Moda Center · Santa Cruz do Capibaribe – PE",
   whatsapp: "5547991991089",   // DDI + DDD + número, só dígitos
   pedidoMinimo: 0,             // valor mínimo do pedido em R$ (0 para desativar)
   mostrarEmBreve: false,       // true = mostra os produtos "em breve" no catálogo; false = esconde e mostra só a faixa no fim
@@ -426,6 +445,8 @@ const imagens = (p) => (p.imagens && p.imagens.length ? p.imagens : [placeholder
 let categoria = "TODOS";
 let genero = "Todos";
 let busca = "";
+let checkout = { entrega: "retirada", cidade: "", pagamento: "Pix" };
+try { checkout = { ...checkout, ...(JSON.parse(localStorage.getItem("checkout") || "{}") || {}) }; } catch (e) {}
 let carrinho = {};   // codigo -> qtd de pacotes
 try { carrinho = JSON.parse(localStorage.getItem("carrinho") || "{}") || {}; } catch (e) { carrinho = {}; }
 const salvar = () => { try { localStorage.setItem("carrinho", JSON.stringify(carrinho)); } catch (e) {} };
@@ -566,6 +587,8 @@ function textoPedido() {
     ...lista.map((i) => `${i.q}x [${i.p.codigo}] ${i.p.nome.toUpperCase()} (pct c/${i.p.pacote})${i.p.precoUnit != null ? ` – ${BRL.format(subtotal(i.p, i.q))}` : ""}`),
     "",
     `Pacotes: ${lista.reduce((s, i) => s + i.q, 0)}`,
+    `Entrega: ${checkout.entrega === "cidade" ? `Receber em ${checkout.cidade || "(informar cidade)"} pela transportadora` : `Retirar no ${LOJA.retirada}`}`,
+    `Pagamento: ${checkout.pagamento}`,
     total > 0 ? `*Total: ${BRL.format(total)}*${consulta ? " + itens sob consulta" : ""}` : "Valores: sob consulta"
   ].filter((l) => l !== null).join("\n");
 }
@@ -599,6 +622,22 @@ function renderCarrinho() {
         ${total > 0 && consulta ? `<div class="note">Alguns itens estão sob consulta e não entram no total.</div>` : ""}
         ${lista.length ? `
           ${falta > 0 ? `<div class="note">Pedido mínimo de ${BRL.format(LOJA.pedidoMinimo)}. Faltam ${BRL.format(falta)}.</div>` : ""}
+          <div class="choice" role="radiogroup" aria-label="Entrega">
+            <div class="choice-title">Entrega</div>
+            <div class="choice-row">
+              <label class="opt" for="cRet"><input type="radio" name="entrega" id="cRet" value="retirada" ${checkout.entrega !== "cidade" ? "checked" : ""}>Retirar no Moda Center</label>
+              <label class="opt" for="cCid"><input type="radio" name="entrega" id="cCid" value="cidade" ${checkout.entrega === "cidade" ? "checked" : ""}>Receber na minha cidade</label>
+            </div>
+            <label class="field" for="cCidade" ${checkout.entrega === "cidade" ? "" : "hidden"} id="cCidadeWrap">Cidade e estado<input id="cCidade" value="${esc(checkout.cidade)}" placeholder="Ex.: Patos – PB" autocomplete="address-level2"></label>
+          </div>
+          <div class="choice" role="radiogroup" aria-label="Pagamento">
+            <div class="choice-title">Pagamento</div>
+            <div class="choice-row">
+              <label class="opt" for="cPix"><input type="radio" name="pagamento" id="cPix" value="Pix" ${checkout.pagamento !== "Cartão" ? "checked" : ""}>Pix</label>
+              <label class="opt" for="cCartao"><input type="radio" name="pagamento" id="cCartao" value="Cartão" ${checkout.pagamento === "Cartão" ? "checked" : ""}>Cartão</label>
+            </div>
+          </div>
+          <div class="cart-err" id="cErr" hidden></div>
           ${cliente ? `<div class="who"><span>Pedido de <strong>${esc(cliente.nome)}</strong> · ${esc(mascara(cliente.zap))}</span><button class="remove" id="cWho">Alterar</button></div>` : ""}
           <a class="wa-btn" id="cSend" target="_blank" rel="noopener" aria-disabled="${falta > 0}">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg>Enviar pedido pelo WhatsApp</a>
@@ -608,14 +647,28 @@ function renderCarrinho() {
           <button class="remove" id="cClear" style="justify-self:start">Esvaziar carrinho</button>` : ""}
       </div>
     </aside>`;
+  atualizarEnvio();
+}
+function atualizarEnvio() {
   const a = $("cSend"); if (a) a.href = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(textoPedido())}`;
 }
+function salvarCheckout() { try { localStorage.setItem("checkout", JSON.stringify(checkout)); } catch (e) {} }
 function abrirCarrinho() {
   renderCarrinho(); $("drawerWrap").hidden = false; document.body.style.overflow = "hidden";
   $("drawerWrap").querySelector("[data-close]").focus();
 }
 function fecharCarrinho() { $("drawerWrap").hidden = true; document.body.style.overflow = ""; }
 $("openCart").addEventListener("click", abrirCarrinho);
+$("drawerWrap").addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.name === "entrega") { checkout.entrega = t.value; $("cCidadeWrap").hidden = t.value !== "cidade"; if (t.value === "cidade") $("cCidade").focus(); }
+  if (t.name === "pagamento") checkout.pagamento = t.value;
+  $("cErr").hidden = true; salvarCheckout(); atualizarEnvio();
+});
+$("drawerWrap").addEventListener("input", (e) => {
+  if (e.target.id !== "cCidade") return;
+  checkout.cidade = e.target.value; $("cErr").hidden = true; salvarCheckout(); atualizarEnvio();
+});
 $("drawerWrap").addEventListener("click", (e) => {
   const w = $("drawerWrap");
   if (e.target === w || e.target.closest("[data-close]")) return fecharCarrinho();
@@ -630,7 +683,12 @@ $("drawerWrap").addEventListener("click", (e) => {
   else if (t.closest("[data-dec]")) ajusta(t.closest("[data-dec]").dataset.dec, -1);
   else if (t.closest("[data-rm]")) { delete carrinho[t.closest("[data-rm]").dataset.rm]; salvar(); atualizarBadge(); renderCarrinho(); }
   else if (t.closest("#cWho")) abrirCadastro();
-  else if (t.closest("#cSend")) registrar("pedido", { pedido: textoPedido() });
+  else if (t.closest("#cSend")) {
+    if (checkout.entrega === "cidade" && !checkout.cidade.trim()) {
+      e.preventDefault(); $("cErr").textContent = "Informe sua cidade e estado para receber pela transportadora."; $("cErr").hidden = false; $("cCidade").focus(); return;
+    }
+    registrar("pedido", { pedido: textoPedido() });
+  }
   else if (t.closest("#cClear")) { carrinho = {}; salvar(); atualizarBadge(); renderCarrinho(); }
   else if (t.closest("#cCopy")) {
     const txt = textoPedido();

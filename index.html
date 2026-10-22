@@ -11,31 +11,35 @@
 <style>
 /* Layout: barra fixa + busca + trilho de categorias rolável + grade de cartões; produto em modal, carrinho em gaveta lateral */
 :root {
-  --bg: #f6f4ee;
+  --bg: #fbf7f1;          /* creme algodão */
   --surface: #ffffff;
-  --ink: #1d1f24;
-  --muted: #6a6c72;
-  --line: #e2ded2;
-  --accent: #f2c230;      /* amarelo-etiqueta */
-  --accent-ink: #1d1f24;
-  --active: #2747c9;      /* categoria selecionada */
+  --ink: #1f3a5f;         /* azul-marinho Mario */
+  --muted: #6b7486;
+  --line: #eadfd2;
+  --accent: #e8604f;      /* coral: botões de compra */
+  --accent-ink: #ffffff;
+  --chip: #fbe3dc;        /* categoria não selecionada */
+  --chip-ink: #1f3a5f;
+  --active: #1f3a5f;      /* categoria selecionada */
   --active-ink: #ffffff;
   --ok: #25a35a;
   --ok-ink: #ffffff;
-  --shade: rgba(20, 20, 24, .55);
+  --shade: rgba(15, 24, 37, .55);
   --display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #15161a; --surface: #1f2126; --ink: #f1efe8; --muted: #a3a4a9; --line: #33353c;
-    --accent: #f2c230; --accent-ink: #1d1f24; --active: #6d86ff; --active-ink: #0f1120;
+    --bg: #0f1825; --surface: #172338; --ink: #f4ece2; --muted: #9aa6ba; --line: #2a3a52;
+    --accent: #f2766b; --accent-ink: #2a0f0b; --chip: #2a3550; --chip-ink: #f4ece2;
+    --active: #f4ece2; --active-ink: #0f1825;
     --ok: #2fbf6b; --ok-ink: #08180e; --shade: rgba(0,0,0,.65); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #15161a; --surface: #1f2126; --ink: #f1efe8; --muted: #a3a4a9; --line: #33353c;
-  --accent: #f2c230; --accent-ink: #1d1f24; --active: #6d86ff; --active-ink: #0f1120;
+  --bg: #0f1825; --surface: #172338; --ink: #f4ece2; --muted: #9aa6ba; --line: #2a3a52;
+  --accent: #f2766b; --accent-ink: #2a0f0b; --chip: #2a3550; --chip-ink: #f4ece2;
+  --active: #f4ece2; --active-ink: #0f1825;
   --ok: #2fbf6b; --ok-ink: #08180e; --shade: rgba(0,0,0,.65); color-scheme: dark;
 }
 
@@ -81,7 +85,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .search-field svg { position: absolute; right: 12px; top: 11px; width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
 .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
 .chip {
-  flex: none; height: 36px; padding: 0 14px; border-radius: 8px; background: var(--accent); color: var(--accent-ink);
+  flex: none; height: 36px; padding: 0 14px; border-radius: 8px; background: var(--chip); color: var(--chip-ink);
   font-family: var(--display); font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: .03em;
 }
 .seg { display: inline-flex; justify-self: start; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }

@@ -193,6 +193,22 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
 }
 .wa-float svg { width: 28px; height: 28px; }
 
+/* Cadastro na entrada */
+.gate { position: fixed; inset: 0; z-index: 70; background: var(--bg); overflow: auto; display: grid; place-items: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.gate-card { width: min(400px, 100%); display: grid; gap: 16px; }
+.gate-card .brand-mark { width: 56px; height: 56px; font-size: 26px; border-radius: 12px; }
+.gate-card h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.gate-card p { margin: 0; color: var(--muted); }
+.gate-card .field input { height: 48px; font-size: 17px; background: var(--surface); }
+.gate-card .field span { color: var(--ink); font-weight: 600; font-size: 14px; }
+.optin { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 14px; color: var(--ink); }
+.optin input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--ok); }
+.gate-err { color: #c0392b; font-size: 14px; font-weight: 600; }
+.gate-btn { height: 52px; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font-family: var(--display); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: .03em; }
+.gate-legal { font-size: 12px; color: var(--muted); }
+.who { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.who strong { font-weight: 600; }
 .toast {
   position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60;
   background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 500; font-size: 14px;
@@ -249,6 +265,19 @@ img { max-width: 100%; }
 <div class="overlay" id="overlay" hidden></div>
 <div class="drawer-wrap" id="drawerWrap" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="gate" id="gate" hidden>
+  <form class="gate-card" id="gateForm" novalidate>
+    <div class="brand-mark" id="gateMark"></div>
+    <h1 id="gateTitle"></h1>
+    <p>Catálogo exclusivo para lojistas. Informe seu WhatsApp para ver produtos e fazer pedidos.</p>
+    <label class="field" for="gNome"><span>Seu nome ou nome da loja</span><input id="gNome" autocomplete="name" required></label>
+    <label class="field" for="gZap"><span>Seu WhatsApp com DDD</span><input id="gZap" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="(81) 99999-9999" required></label>
+    <label class="optin" for="gOpt"><input id="gOpt" type="checkbox"><span>Quero receber novidades e promoções pelo WhatsApp</span></label>
+    <div class="gate-err" id="gErr" hidden></div>
+    <button class="gate-btn" type="submit">Ver catálogo</button>
+    <div class="gate-legal">Usamos seu número só para atender seus pedidos e, se você marcar a opção acima, para enviar novidades. Você pode pedir para sair a qualquer momento.</div>
+  </form>
+</div>
 
 <script>
 /* =====================================================================
@@ -259,7 +288,8 @@ const LOJA = {
   sigla: "MA",
   endereco: "Rua das Confecções, 120 · Centro · Santa Cruz do Capibaribe – PE",
   whatsapp: "5581999999999",   // DDI + DDD + número, só dígitos
-  pedidoMinimo: 0              // valor mínimo do pedido em R$ (0 para desativar)
+  pedidoMinimo: 0,             // valor mínimo do pedido em R$ (0 para desativar)
+  planilha: "https://script.google.com/macros/s/AKfycbwR9ic7MINKeNU31lkCoKw5l9Nn2tg6AZgYr4m3PB0O0KmoO85Vz1qy6XQm9TWT8FTf/exec"                 // link do Apps Script da Planilha Google que recebe os cadastros (vazio = não envia)
 };
 
 /* PRODUTOS
@@ -481,13 +511,14 @@ function atualizarBadge() {
   const n = itens().reduce((s, i) => s + i.q, 0);
   $("cartBadge").textContent = n; $("cartBadge").hidden = n === 0;
 }
-function textoPedido(nome) {
+function textoPedido() {
   const lista = itens();
   const total = lista.reduce((s, i) => s + (subtotal(i.p, i.q) || 0), 0);
   const consulta = lista.some((i) => i.p.precoUnit == null);
   return [
     `*Pedido – ${LOJA.nome}*`,
-    nome ? `Cliente: ${nome}` : null,
+    cliente ? `Cliente: ${cliente.nome}` : null,
+    cliente ? `WhatsApp: ${mascara(cliente.zap)}` : null,
     "",
     ...lista.map((i) => `${i.q}x [${i.p.codigo}] ${i.p.nome.toUpperCase()} (pct c/${i.p.pacote})${i.p.precoUnit != null ? ` – ${BRL.format(subtotal(i.p, i.q))}` : ""}`),
     "",
@@ -495,7 +526,6 @@ function textoPedido(nome) {
     total > 0 ? `*Total: ${BRL.format(total)}*${consulta ? " + itens sob consulta" : ""}` : "Valores: sob consulta"
   ].filter((l) => l !== null).join("\n");
 }
-let nomeCliente = "";
 function renderCarrinho() {
   const lista = itens();
   const total = lista.reduce((s, i) => s + (subtotal(i.p, i.q) || 0), 0);
@@ -526,7 +556,7 @@ function renderCarrinho() {
         ${total > 0 && consulta ? `<div class="note">Alguns itens estão sob consulta e não entram no total.</div>` : ""}
         ${lista.length ? `
           ${falta > 0 ? `<div class="note">Pedido mínimo de ${BRL.format(LOJA.pedidoMinimo)}. Faltam ${BRL.format(falta)}.</div>` : ""}
-          <label class="field" for="cNome">Seu nome (opcional)<input id="cNome" value="${esc(nomeCliente)}" autocomplete="name"></label>
+          ${cliente ? `<div class="who"><span>Pedido de <strong>${esc(cliente.nome)}</strong> · ${esc(mascara(cliente.zap))}</span><button class="remove" id="cWho">Alterar</button></div>` : ""}
           <a class="wa-btn" id="cSend" target="_blank" rel="noopener" aria-disabled="${falta > 0}">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Z"/></svg>Enviar pedido pelo WhatsApp</a>
           <button class="secondary" id="cCopy">Copiar pedido</button>
@@ -535,9 +565,7 @@ function renderCarrinho() {
           <button class="remove" id="cClear" style="justify-self:start">Esvaziar carrinho</button>` : ""}
       </div>
     </aside>`;
-  const atualizarLink = () => { const a = $("cSend"); if (a) a.href = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(textoPedido(nomeCliente))}`; };
-  atualizarLink();
-  const nome = $("cNome"); if (nome) nome.addEventListener("input", () => { nomeCliente = nome.value; atualizarLink(); });
+  const a = $("cSend"); if (a) a.href = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(textoPedido())}`;
 }
 function abrirCarrinho() {
   renderCarrinho(); $("drawerWrap").hidden = false; document.body.style.overflow = "hidden";
@@ -558,16 +586,18 @@ $("drawerWrap").addEventListener("click", (e) => {
   if (t.closest("[data-inc]")) ajusta(t.closest("[data-inc]").dataset.inc, 1);
   else if (t.closest("[data-dec]")) ajusta(t.closest("[data-dec]").dataset.dec, -1);
   else if (t.closest("[data-rm]")) { delete carrinho[t.closest("[data-rm]").dataset.rm]; salvar(); atualizarBadge(); renderCarrinho(); }
+  else if (t.closest("#cWho")) abrirCadastro();
+  else if (t.closest("#cSend")) registrar("pedido", { pedido: textoPedido() });
   else if (t.closest("#cClear")) { carrinho = {}; salvar(); atualizarBadge(); renderCarrinho(); }
   else if (t.closest("#cCopy")) {
-    const txt = textoPedido(nomeCliente);
+    const txt = textoPedido();
     const fallback = () => { const ta = $("cText"); ta.value = txt; ta.hidden = false; ta.select(); toast("Selecione e copie o texto abaixo"); };
     try { navigator.clipboard.writeText(txt).then(() => toast("Pedido copiado"), fallback); } catch (err) { fallback(); }
   }
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape") return;
+  if (e.key !== "Escape" || !$("gate").hidden) return;
   if (!$("overlay").hidden) fecharProduto(); else if (!$("drawerWrap").hidden) fecharCarrinho();
 });
 
@@ -577,7 +607,48 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 2200);
 }
 
+// Cadastro do cliente
+let cliente = null;
+try { cliente = JSON.parse(localStorage.getItem("cliente") || "null"); } catch (e) { cliente = null; }
+const digitos = (v) => String(v).replace(/\D/g, "");
+function mascara(v) {
+  const d = digitos(v).replace(/^55(?=\d{10,11}$)/, "").slice(0, 11);
+  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+function registrar(evento, extra = {}) {
+  if (!LOJA.planilha || !cliente) return;
+  const body = new URLSearchParams({
+    evento, nome: cliente.nome, whatsapp: "55" + digitos(cliente.zap), novidades: cliente.optin ? "SIM" : "NÃO", ...extra
+  });
+  try { fetch(LOJA.planilha, { method: "POST", mode: "no-cors", body }).catch(() => {}); } catch (e) {}
+}
+function abrirCadastro() {
+  $("gateMark").textContent = LOJA.sigla;
+  $("gateTitle").textContent = LOJA.nome;
+  if (cliente) { $("gNome").value = cliente.nome; $("gZap").value = mascara(cliente.zap); $("gOpt").checked = !!cliente.optin; }
+  $("gErr").hidden = true; $("gate").hidden = false; document.body.style.overflow = "hidden";
+  setTimeout(() => $(cliente ? "gZap" : "gNome").focus(), 50);
+}
+$("gZap").addEventListener("input", (e) => { e.target.value = mascara(e.target.value); });
+$("gateForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nome = $("gNome").value.trim();
+  const zap = digitos($("gZap").value);
+  const erro = nome.length < 2 ? "Digite seu nome." : !/^[1-9]{2}9?\d{8}$/.test(zap) ? "Confira o WhatsApp: DDD + número, ex. (81) 99999-9999." : "";
+  if (erro) { $("gErr").textContent = erro; $("gErr").hidden = false; return; }
+  const novo = !cliente || cliente.zap !== zap;
+  cliente = { nome, zap, optin: $("gOpt").checked };
+  try { localStorage.setItem("cliente", JSON.stringify(cliente)); } catch (err) {}
+  registrar(novo ? "cadastro" : "atualizacao");
+  $("gate").hidden = true; document.body.style.overflow = $("drawerWrap").hidden ? "" : "hidden";
+  if (!$("drawerWrap").hidden) renderCarrinho();
+});
+
 renderChips(); renderSeg(); renderGrid(); atualizarBadge();
+if (!cliente) abrirCadastro();
 </script>
 </body>
 </html>

@@ -125,6 +125,15 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
 .soon-box { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
 .soon-box p { margin: 0; font-size: 14px; color: var(--muted); }
 .soon-box .wa-btn { height: 44px; }
+.teaser {
+  margin-top: 28px; background: var(--ink); color: var(--bg); border-radius: 12px; padding: 22px 20px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 24px; align-items: center;
+}
+@media (max-width: 600px) { .teaser { grid-template-columns: minmax(0, 1fr); } }
+.teaser-eyebrow { font-family: var(--display); font-weight: 700; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.teaser h2 { margin: 2px 0 6px; font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
+.teaser p { margin: 0; opacity: .85; max-width: 52ch; }
+.teaser .wa-btn { padding: 0 20px; }
 .buy { height: 36px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font-weight: 600; width: 100%; }
 .empty { text-align: center; color: var(--muted); padding: 60px 0; }
 
@@ -269,6 +278,14 @@ img { max-width: 100%; }
 <main>
   <div class="count" id="count"></div>
   <div class="grid" id="grid"></div>
+  <section class="teaser" id="teaser" hidden>
+    <div class="teaser-text">
+      <div class="teaser-eyebrow">Em breve</div>
+      <h2>Coleção inverno chegando</h2>
+      <p>Conjuntos de moletom, meia estação, calças e blusas de moletom. Quer ser avisado primeiro quando chegar?</p>
+    </div>
+    <a class="wa-btn" id="teaserBtn" target="_blank" rel="noopener">Avise-me pelo WhatsApp</a>
+  </section>
 </main>
 
 <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
@@ -302,6 +319,7 @@ const LOJA = {
   endereco: "Catálogo de moda infantil no atacado",
   whatsapp: "5547991991089",   // DDI + DDD + número, só dígitos
   pedidoMinimo: 0,             // valor mínimo do pedido em R$ (0 para desativar)
+  mostrarEmBreve: false,       // true = mostra os produtos "em breve" no catálogo; false = esconde e mostra só a faixa no fim
   planilha: "https://script.google.com/macros/s/AKfycbwR9ic7MINKeNU31lkCoKw5l9Nn2tg6AZgYr4m3PB0O0KmoO85Vz1qy6XQm9TWT8FTf/exec"                 // link do Apps Script da Planilha Google que recebe os cadastros (vazio = não envia)
 };
 
@@ -378,6 +396,8 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 // Se o produto tem precoKit, ele manda: o valor por peça é calculado a partir dele
 PRODUTOS.forEach((p) => { if (p.precoKit != null) p.precoUnit = p.precoKit / p.pacote; });
+const VISIVEIS = PRODUTOS.filter((p) => LOJA.mostrarEmBreve || !p.emBreve);
+const temEmBreveOculto = VISIVEIS.length < PRODUTOS.length;
 const precoPacote = (p) => (p.precoKit != null ? p.precoKit : p.precoUnit == null ? null : +(p.precoUnit * p.pacote).toFixed(2));
 const preco = (v) => (v == null ? "Sob consulta" : BRL.format(v));
 const subtotal = (p, q) => (precoPacote(p) == null ? null : +(precoPacote(p) * q).toFixed(2));
@@ -415,10 +435,13 @@ $("brandMark").textContent = LOJA.sigla;
 $("brandName").textContent = LOJA.nome;
 $("brandAddr").textContent = LOJA.endereco;
 $("waFloat").href = `https://wa.me/${LOJA.whatsapp}`;
+$("teaser").hidden = !temEmBreveOculto;
+$("teaserBtn").href = `https://wa.me/${LOJA.whatsapp}?text=${encodeURIComponent(`Olá! Quero ser avisado quando chegar a coleção de inverno da ${LOJA.nome}.`)}`;
+$("teaserBtn").addEventListener("click", () => registrar("interesse", { pedido: "Coleção inverno" }));
 document.title = LOJA.nome + " · Catálogo";
 
 // Categorias
-const categorias = ["TODOS", ...new Set(PRODUTOS.map((p) => p.categoria))];
+const categorias = ["TODOS", ...new Set(VISIVEIS.map((p) => p.categoria))];
 function renderSeg() {
   $("seg").innerHTML = ["Todos", "Menino", "Menina"].map((g) =>
     `<button data-gen="${g}" aria-pressed="${g === genero}">${g}</button>`).join("");
@@ -439,7 +462,7 @@ $("chips").addEventListener("click", (e) => {
 // Grade
 function filtrados() {
   const q = norm(busca.trim());
-  return PRODUTOS.filter((p) =>
+  return VISIVEIS.filter((p) =>
     (categoria === "TODOS" || p.categoria === categoria) &&
     (genero === "Todos" || p.genero === genero || p.genero === "Unissex") &&
     (!q || norm(p.nome + " " + p.codigo + " " + p.descricao).includes(q))
@@ -447,7 +470,7 @@ function filtrados() {
 }
 function renderGrid() {
   const lista = filtrados();
-  $("count").textContent = `${lista.length} de ${PRODUTOS.length} produtos`;
+  $("count").textContent = `${lista.length} de ${VISIVEIS.length} produtos`;
   $("grid").innerHTML = lista.length ? lista.map((p) => `
     <article class="card">
       <button class="thumb" data-open="${esc(p.codigo)}" aria-label="Ver ${esc(p.nome)}">
@@ -465,7 +488,7 @@ $("searchForm").addEventListener("submit", (e) => e.preventDefault());
 
 // Modal do produto
 function abrirProduto(codigo) {
-  const p = PRODUTOS.find((x) => x.codigo === codigo); if (!p) return;
+  const p = VISIVEIS.find((x) => x.codigo === codigo); if (!p) return;
   const imgs = imagens(p);
   let qtd = 1;
   const ov = $("overlay");

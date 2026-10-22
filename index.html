@@ -16,6 +16,7 @@
   --ink: #1f3a5f;         /* azul-marinho Mario */
   --muted: #6b7486;
   --line: #eadfd2;
+  --photo: #ffffff;       /* fundo das fotos (são em fundo branco) */
   --accent: #e8604f;      /* coral: botões de compra */
   --accent-ink: #ffffff;
   --chip: #fbe3dc;        /* categoria não selecionada */
@@ -101,10 +102,10 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
 @media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
 .card { display: flex; flex-direction: column; min-width: 0; text-align: center; }
 .thumb {
-  position: relative; aspect-ratio: 1 / 1; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--line);
+  position: relative; aspect-ratio: 3 / 4; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--photo);
   display: block; width: 100%;
 }
-.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .code-tag {
   position: absolute; right: 6px; bottom: 6px; background: var(--surface); color: var(--ink); font-size: 10.5px; font-weight: 600;
   padding: 1px 5px; border-radius: 4px; font-variant-numeric: tabular-nums; letter-spacing: .03em;
@@ -131,12 +132,12 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
   display: grid; place-items: center; z-index: 1;
 }
 .close svg { width: 18px; height: 18px; }
-.gallery-main { aspect-ratio: 1/1; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--line); }
-.gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-main { aspect-ratio: 3/4; max-width: 100%; border-radius: 10px; overflow: hidden; background: var(--photo); }
+.gallery-main img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .thumbs button { width: 52px; height: 52px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; padding: 0; }
 .thumbs button[aria-current="true"] { border-color: var(--active); }
-.thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs img { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--photo); }
 .m-info { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .m-code { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; font-variant-numeric: tabular-nums; padding-right: 44px; }
 .m-title { margin: 0; font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.05; text-transform: uppercase; text-wrap: balance; }
@@ -166,7 +167,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 96px; }
 .drawer-head h2 { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 800; text-transform: uppercase; }
 .lines { flex: 1; overflow: auto; padding: 8px 16px; }
 .line { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); align-items: center; }
-.line img { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; }
+.line img { width: 56px; height: 56px; border-radius: 6px; object-fit: contain; background: var(--photo); }
 .line-name { font-size: 13px; font-weight: 600; text-transform: uppercase; line-height: 1.2; }
 .line-sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .line-ctrl { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
@@ -300,66 +301,66 @@ const LOJA = {
    codigo, nome, categoria, genero (Menino / Menina / Unissex), precoUnit (R$ por peça; null = sob consulta), pacote (peças por pacote),
    estoque (pacotes disponíveis; null = sem limite), descricao, imagens (lista de URLs; vazio = imagem gerada) */
 const PRODUTOS = [
-  {codigo: "001", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: []},
-  {codigo: "002", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: []},
-  {codigo: "003", nome: "Macacões Zíper P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: []},
-  {codigo: "004", nome: "Macacões Zíper P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: []},
-  {codigo: "005", nome: "Conjuntos de Body Curto + Short P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
-  {codigo: "006", nome: "Conjuntos de Body Curto + Short P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
-  {codigo: "007", nome: "Conjuntos de Body Curto + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
-  {codigo: "008", nome: "Conjuntos de Body Curto + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
-  {codigo: "009", nome: "Conjuntos de Body Longo + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: []},
-  {codigo: "010", nome: "Conjuntos de Body Longo + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: []},
-  {codigo: "011", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "012", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "013", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
-  {codigo: "014", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
-  {codigo: "015", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "016", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
-  {codigo: "017", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
-  {codigo: "018", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
-  {codigo: "019", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "020", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "021", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Personagens", imagens: []},
-  {codigo: "022", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Personagens", imagens: []},
-  {codigo: "023", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "024", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
-  {codigo: "025", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
-  {codigo: "026", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
-  {codigo: "027", nome: "Vestidos Cotton 2 ao 14 - Coleção", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Coleção", imagens: []},
-  {codigo: "028", nome: "Vestidos Cotton 2 ao 14 - Personagens", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Personagens", imagens: []},
-  {codigo: "029", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "030", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "031", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
-  {codigo: "032", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
-  {codigo: "033", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "034", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
-  {codigo: "035", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
-  {codigo: "036", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
-  {codigo: "037", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "038", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "039", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Liso", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Liso", imagens: []},
-  {codigo: "040", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Liso", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Liso", imagens: []},
-  {codigo: "041", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "042", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "043", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
-  {codigo: "044", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
-  {codigo: "045", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "046", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
-  {codigo: "047", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
-  {codigo: "048", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
-  {codigo: "049", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: []},
-  {codigo: "050", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: []},
-  {codigo: "051", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: []},
-  {codigo: "052", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: []},
-  {codigo: "053", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "054", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: []},
-  {codigo: "055", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: []},
-  {codigo: "056", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: []},
-  {codigo: "057", nome: "Calças de Moletom 1 ao 14 - Masculino", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino", imagens: []},
-  {codigo: "058", nome: "Calças de Moletom 1 ao 14 - Feminino", categoria: "Moletom avulso", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Feminino", imagens: []},
-  {codigo: "059", nome: "Blusa de Moletom 1 ao 14 - Masculino Coleção", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Coleção", imagens: []},
-  {codigo: "060", nome: "Blusa de Moletom 1 ao 14 - Masculino Personagens", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Personagens", imagens: []}
+  {codigo: "001", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: ["fotos/001.jpg"]},
+  {codigo: "002", nome: "Macaquinhos Romper - Banho de sol - P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: ["fotos/002.jpg"]},
+  {codigo: "003", nome: "Macacões Zíper P ao 3 - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Masculino", imagens: ["fotos/003.jpg"]},
+  {codigo: "004", nome: "Macacões Zíper P ao 3 - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao 3 · Feminino", imagens: ["fotos/004.jpg"]},
+  {codigo: "005", nome: "Conjuntos de Body Curto + Short P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: ["fotos/005.jpg"]},
+  {codigo: "006", nome: "Conjuntos de Body Curto + Short P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: ["fotos/006.jpg"]},
+  {codigo: "007", nome: "Conjuntos de Body Curto + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: ["fotos/007.jpg"]},
+  {codigo: "008", nome: "Conjuntos de Body Curto + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: ["fotos/008.jpg"]},
+  {codigo: "009", nome: "Conjuntos de Body Longo + Calça P ao GG - Masculino", categoria: "Bebê", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Masculino", imagens: ["fotos/009.jpg"]},
+  {codigo: "010", nome: "Conjuntos de Body Longo + Calça P ao GG - Feminino", categoria: "Bebê", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam P ao GG · Feminino", imagens: ["fotos/010.jpg"]},
+  {codigo: "011", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: ["fotos/011.jpg"]},
+  {codigo: "012", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: ["fotos/012.jpg"]},
+  {codigo: "013", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: ["fotos/013.jpg"]},
+  {codigo: "014", nome: "Conjuntos de Pijama Camiseta + Short 1 ao 8 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: ["fotos/014.jpg"]},
+  {codigo: "015", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Coleção", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: ["fotos/015.jpg"]},
+  {codigo: "016", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Coleção", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: ["fotos/016.jpg"]},
+  {codigo: "017", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Masculino Personagens", categoria: "Pijama curto", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: ["fotos/017.jpg"]},
+  {codigo: "018", nome: "Conjuntos de Pijama Camiseta + Short 10 ao 14 - Feminino Personagens", categoria: "Pijama curto", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: ["fotos/018.jpg"]},
+  {codigo: "019", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Coleção", imagens: ["fotos/019.jpg"]},
+  {codigo: "020", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Coleção", imagens: ["fotos/020.jpg"]},
+  {codigo: "021", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Masculino · Personagens", imagens: ["fotos/021.jpg"]},
+  {codigo: "022", nome: "Conjuntos de Pijama Camiseta Longa + Calça 2 ao 8 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 8 · Feminino · Personagens", imagens: ["fotos/022.jpg"]},
+  {codigo: "023", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Coleção", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: ["fotos/023.jpg"]},
+  {codigo: "024", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Coleção", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: ["fotos/024.jpg"]},
+  {codigo: "025", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Masculino Personagens", categoria: "Pijama longo", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: ["fotos/025.jpg"]},
+  {codigo: "026", nome: "Conjuntos de Pijama Camiseta Longa + Calça 10 ao 14 - Feminino Personagens", categoria: "Pijama longo", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: ["fotos/026.jpg"]},
+  {codigo: "027", nome: "Vestidos Cotton 2 ao 14 - Coleção", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Coleção", imagens: ["fotos/027.jpg", "fotos/027-2.jpg"]},
+  {codigo: "028", nome: "Vestidos Cotton 2 ao 14 - Personagens", categoria: "Vestidos", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 2 ao 14 · Personagens", imagens: ["fotos/028.jpg", "fotos/028-2.jpg"]},
+  {codigo: "029", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: ["fotos/029.jpg"]},
+  {codigo: "030", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: ["fotos/030.jpg"]},
+  {codigo: "031", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: ["fotos/031.jpg"]},
+  {codigo: "032", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: ["fotos/032.jpg"]},
+  {codigo: "033", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: ["fotos/033.jpg"]},
+  {codigo: "034", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: ["fotos/034.jpg"]},
+  {codigo: "035", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Personagens", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: ["fotos/035.jpg"]},
+  {codigo: "036", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Personagens", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: ["fotos/036.jpg"]},
+  {codigo: "037", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Masculino Coleção", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: ["fotos/037.jpg"]},
+  {codigo: "038", nome: "Conjuntos de Camiseta + Short Moletinho 1 ao 8 - Feminino Coleção", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: ["fotos/038.jpg"]},
+  {codigo: "039", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Masculino Liso", categoria: "Conjunto verão", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Liso", imagens: ["fotos/039.jpg"]},
+  {codigo: "040", nome: "Conjuntos de Camiseta + Short Moletinho 10 ao 14 - Feminino Liso", categoria: "Conjunto verão", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Liso", imagens: ["fotos/040.jpg"]},
+  {codigo: "041", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: ["fotos/041.jpg"]},
+  {codigo: "042", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: ["fotos/042.jpg"]},
+  {codigo: "043", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: ["fotos/043.jpg"]},
+  {codigo: "044", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 1 ao 8 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: ["fotos/044.jpg"]},
+  {codigo: "045", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Coleção", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: ["fotos/045.jpg"]},
+  {codigo: "046", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Coleção", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: ["fotos/046.jpg"]},
+  {codigo: "047", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Masculino Personagens", categoria: "Meia estação", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: ["fotos/047.jpg"]},
+  {codigo: "048", nome: "Conjuntos Meia Estação Camiseta Manga Longa + Calça Moletom 10 ao 14 - Feminino Personagens", categoria: "Meia estação", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: ["fotos/048.jpg"]},
+  {codigo: "049", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Coleção", imagens: ["fotos/049.jpg"]},
+  {codigo: "050", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Coleção", imagens: ["fotos/050.jpg"]},
+  {codigo: "051", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Masculino · Personagens", imagens: ["fotos/051.jpg"]},
+  {codigo: "052", nome: "Conjuntos Inverno Blusa Moletom + Calça 1 ao 8 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 8 · Feminino · Personagens", imagens: ["fotos/052.jpg"]},
+  {codigo: "053", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Coleção", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Coleção", imagens: ["fotos/053.jpg"]},
+  {codigo: "054", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Coleção", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Coleção", imagens: ["fotos/054.jpg"]},
+  {codigo: "055", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Masculino Personagens", categoria: "Inverno", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Masculino · Personagens", imagens: ["fotos/055.jpg"]},
+  {codigo: "056", nome: "Conjuntos Inverno Blusa Moletom + Calça 10 ao 14 - Feminino Personagens", categoria: "Inverno", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 10 ao 14 · Feminino · Personagens", imagens: ["fotos/056.jpg"]},
+  {codigo: "057", nome: "Calças de Moletom 1 ao 14 - Masculino", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino", imagens: ["fotos/057.jpg"]},
+  {codigo: "058", nome: "Calças de Moletom 1 ao 14 - Feminino", categoria: "Moletom avulso", genero: "Menina", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Feminino", imagens: ["fotos/058.jpg"]},
+  {codigo: "059", nome: "Blusa de Moletom 1 ao 14 - Masculino Coleção", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Coleção", imagens: ["fotos/059.jpg"]},
+  {codigo: "060", nome: "Blusa de Moletom 1 ao 14 - Masculino Personagens", categoria: "Moletom avulso", genero: "Menino", precoUnit: null, pacote: 24, estoque: null, descricao: "Pacote com 24 peças · Tam 1 ao 14 · Masculino · Personagens", imagens: ["fotos/060.jpg"]}
 ];
 /* ===================================================================== */
 
@@ -627,7 +628,28 @@ function registrar(evento, extra = {}) {
   const body = new URLSearchParams({
     evento, nome: cliente.nome, whatsapp: "55" + digitos(cliente.zap), novidades: cliente.optin ? "SIM" : "NÃO", ...extra
   });
-  try { fetch(LOJA.planilha, { method: "POST", mode: "no-cors", body }).catch(() => {}); } catch (e) {}
+  enviarPlanilha(body.toString());
+}
+// Envia para a planilha; se o navegador bloquear, guarda e tenta de novo na próxima visita
+function enviarPlanilha(dados) {
+  const guardar = () => {
+    try { const f = JSON.parse(localStorage.getItem("pendentes") || "[]"); f.push(dados); localStorage.setItem("pendentes", JSON.stringify(f.slice(-20))); } catch (e) {}
+  };
+  try {
+    fetch(LOJA.planilha, { method: "POST", mode: "no-cors", keepalive: true,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: dados })
+      .catch(() => {
+        let ok = false;
+        try { ok = navigator.sendBeacon(LOJA.planilha, new Blob([dados], { type: "application/x-www-form-urlencoded" })); } catch (e) {}
+        if (!ok) guardar();
+      });
+  } catch (e) { guardar(); }
+}
+function reenviarPendentes() {
+  if (!LOJA.planilha) return;
+  let f = [];
+  try { f = JSON.parse(localStorage.getItem("pendentes") || "[]"); localStorage.removeItem("pendentes"); } catch (e) {}
+  f.forEach(enviarPlanilha);
 }
 function abrirCadastro() {
   $("gateMark").textContent = LOJA.sigla;
@@ -653,6 +675,7 @@ $("gateForm").addEventListener("submit", (e) => {
 
 renderChips(); renderSeg(); renderGrid(); atualizarBadge();
 if (!cliente) abrirCadastro();
+reenviarPendentes();
 </script>
 </body>
 </html>
